@@ -12,3 +12,5 @@ Roxygen: list(markdown = TRUE)
 Suggests: 
     data.table,
     dplyr
+URL: https://github.com/deor001/deor
+BugReports: https://github.com/deor001/deor/issues
