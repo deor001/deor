@@ -14,6 +14,7 @@ remotes::install_github("deor001/deor")
 | Función | Descripción                                                                           |
 |---------|---------------------------------------------------------------------------------------|
 | `fnc()` | Formatea números con convención chilena: punto como separador de miles y coma decimal |
+| `ils()` | inserta línea de sección (addin RStudio)                                              |
 
 ## Estado
 

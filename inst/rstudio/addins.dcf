@@ -1,0 +1,4 @@
+Name: Inserta línea de sección
+Description: Reemplaza l0/l1/l2/l9 (con número opcional) antes del cursor por una línea de sección.
+Binding: ils
+Interactive: false

@@ -1,5 +1,4 @@
 
-
 #           ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 #           ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ FORMATO CHILENO PARA NÚMEROS ΞΞΞΞΞΞΞΞΞΞΞΞ
 #           ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ [FNC] ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
@@ -23,17 +22,17 @@ if(FALSE){
     #
     # Versión operativa: v1.0.0
     # Versión actual:    v1.0.0
-    # Fecha de inicio:   No registrada
-    # Fecha de entrega:  No registrada
+    # Fecha de creación: 260928
+    # Fecha de versión:  261011
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
     #
     # HALLAZGO 1
     #
     # Descripción:
     #
-    # Observador:        @deor
+    # Observador:
     #
-    # Corrector:         @deor
+    # Corrector:
     #
     # Acción:
     #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
@@ -131,7 +130,7 @@ fnc    <- function(n
                     , bandera = ""
 ) {
     if (fmt == "d" && any(n != trunc(n), na.rm = TRUE)) {
-        warning("Hay valores no enteros; se usar\u00e1 fmt = 'f' con dgt= 0.")
+        warning("Hay valores no enteros; se usará fmt = 'f' con dgt= 0.")
         fmt                   <- "f"
         dgt                   <- 0
     }
