@@ -15,4 +15,5 @@ Suggests:
 URL: https://github.com/deor001/deor
 BugReports: https://github.com/deor001/deor/issues
 Imports: 
-    rstudioapi
+    rstudioapi,
+    tcltk

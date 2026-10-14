@@ -2,6 +2,7 @@
 
 export(fnc)
 export(ils)
+export(vtc)
 importFrom(rstudioapi,
   document_position,
   document_range,
