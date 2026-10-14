@@ -1,6 +1,6 @@
 Package: deor
 Title: Funciones Utilitarias Personales
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: 
     person("Manuel", "de Orúe Ríos", , "deor001@gmail.com", role = c("aut", "cre"))
 Description: Funciones de apoyo, incluido el formato numérico chileno.
