@@ -2,6 +2,7 @@
 
 export(fnc)
 export(ils)
+export(ipr)
 export(vtc)
 importFrom(rstudioapi,
   document_position,
