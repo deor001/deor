@@ -10,8 +10,17 @@ Encoding: UTF-8
 Language: es
 Roxygen: list(markdown = TRUE)
 Suggests: 
+    archive,
+    arrow,
     data.table,
-    dplyr
+    dplyr,
+    foreign,
+    fst,
+    haven,
+    jsonlite,
+    readODS,
+    readxl,
+    RODBC
 URL: https://github.com/deor001/deor
 BugReports: https://github.com/deor001/deor/issues
 Imports: 

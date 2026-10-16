@@ -44,7 +44,9 @@ de un elemento, es una línea. NULL = modo widgets propios.}
 \item{boton}{Texto del botón que cierra la ventana (modo texto).}
 }
 \value{
-De forma invisible, el handle: un entorno con
+\if{html}{\out{<div class="sourceCode">}}\preformatted{             De forma invisible, el handle: un entorno con
+}\if{html}{\out{</div>}}
+
 \code{ventana}              el tktoplevel
 \code{frm}                  frame donde empaquetar los widgets
 \code{fuente(t, e)}         texto de fuente Tk (tamaño t, estilo e: "bold", ...)

@@ -6,38 +6,56 @@
 #
 if(FALSE){
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
-    #
     # OBJETIVO
     #
-    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # Crear una ventana centrada en la pantalla principal que se ajusta a su
+    #   contenido.
     #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # AUTOR
     #
     # Nombre:            Manuel de Orúe Ríos (@deor)
     # Correo:            deor001@gmail.com
     # Obs:               con asistencia de IA
-    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # REGISTRO DE DEPENDENCIAS
+    #
+    # No tiene dependencias
+    #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # REGISTRO DE MODIFICACIONES
     #
-    # Versión operativa: No hay
-    # Versión actual:    v1.0.03
-    # Fecha de creación: 261012
-    # Fecha de versión:  261013
-    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Versión           Fecha ini       Fecha fin
+    # v1.0.00           261012          261012
+    # v1.0.01           261012          261012
+    # v1.0.02           261013          261013
+    # v1.0.03           261013          261014
+    # v1.0.04           261015          261015
     #
-    # HALLAZGO 1
+    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # BITÁCORA
+    #
+    # Fecha:            261015
+    #
+    # Versión:          v1.0.04
     #
     # Descripción:      Puedes anotar en el encabezado el hallazgo principal:
-    #                   la ventana titilaba porque las barras se mostraban y
-    #                   ocultaban desde <Configure>
+    #                       la ventana titilaba porque las barras se mostraban y
+    #                       ocultaban desde <Configure>
+    #                   KWin ubica la ventana al aparecer e ignora
+    #                       el reposicionamiento posterior
+    #                   Una ventana en modo widgets queda invisible hasta
+    #                        que se llama a h$mostrar()
     #
-    # Observador:        @deor
+    # Observador:       @deor
     #
-    # Corrector:         @deor
+    # Corrector:        @deor
     #
-    # Acción:           corrigió decidiéndolas una sola vez en recalcular()
-    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # Acción:           Corrigió decidiéndolas una sola vez en recalcular()
+    #                   se crea oculta y se muestra después de recalcular()
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
 
 #' Ventana Tk centrada en la pantalla principal
@@ -54,20 +72,30 @@ if(FALSE){
 #'                          `h$frm` y luego mostrar la ventana con `h$mostrar()`.
 #'
 #' @param titulo            Título de la ventana.
+#'
 #' @param texto             Vector de texto. Cada elemento, y cada salto de línea dentro
 #'                          de un elemento, es una línea. NULL = modo widgets propios.
+#'
 #' @param bloquear          TRUE: R espera hasta que la ventana se cierre.
+#'
 #' @param ancho_min         Ancho mínimo en px.
+#'
 #' @param alto_min          Alto mínimo en px.
+#'
 #' @param margen            Margen interior en px (contenido separado del borde).
+#'
 #' @param margen_pantalla   Px que se descuentan del alto de la pantalla
 #'                          (barra de tareas u otros paneles).
+#'
 #' @param fuente            Familia de fuente. NULL = monoespaciada según el sistema.
+#'
 #' @param tamano            Tamaño de la fuente.
+#'
 #' @param filas_max         Filas de texto visibles antes de usar desplazamiento.
+#'
 #' @param boton             Texto del botón que cierra la ventana (modo texto).
 #'
-#' @return De forma invisible, el handle: un entorno con
+#' @return                  De forma invisible, el handle: un entorno con
 #'   `ventana`              el tktoplevel
 #'   `frm`                  frame donde empaquetar los widgets
 #'   `fuente(t, e)`         texto de fuente Tk (tamaño t, estilo e: "bold", ...)
@@ -99,24 +127,25 @@ vtc                      <- function(titulo            = "deor"
                                      , filas_max       = 20L
                                      , boton           = "Finalizar"
 ) {
-    familia              <- if (is.null(fuente)) .vtc_fuente_sistema() else fuente
+    familia              <- if (is.null(fuente)) .vtc.fuente.sistema() else fuente
     ventana              <- tcltk::tktoplevel()
+    tcltk::tkwm.withdraw(ventana)
     tcltk::tkwm.title(ventana, titulo)
     tcltk::tkwm.resizable(ventana, TRUE, TRUE)
 
-    sc                   <- .vtc_scrollable(ventana, margen)
-    monitor              <- .vtc_monitor(ventana)      # se mide una sola vez
+    sc                   <- .vtc.scrollable(ventana, margen)
+    monitor              <- .vtc.monitor(ventana)      # se mide una sola vez
 
     h                    <- new.env()
     h$ventana            <- ventana
     h$frm                <- sc$frm
-    h$fuente             <- function(t = tamano, e = "") .vtc_fuente_tk(familia, t, e)
+    h$fuente             <- function(t = tamano, e = "") .vtc.fuente.tk(familia, t, e)
 
     h$recalcular         <- function() {
-        if (!.vtc_existe(ventana)) return(invisible(NULL))
+        if (!.vtc.existe(ventana)) return(invisible(NULL))
         tcltk::tcl("update", "idletasks")
-        ancho            <- max(.vtc_medida(h$frm, "reqwidth"),  as.integer(ancho_min))
-        alto             <- max(.vtc_medida(h$frm, "reqheight"), as.integer(alto_min))
+        ancho            <- max(.vtc.medida(h$frm, "reqwidth"),  as.integer(ancho_min))
+        alto             <- max(.vtc.medida(h$frm, "reqheight"), as.integer(alto_min))
         alto_util        <- max(monitor$alto - as.integer(margen_pantalla), 150L)
         ancho_util       <- monitor$ancho
 
@@ -145,8 +174,9 @@ vtc                      <- function(titulo            = "deor"
     }
 
     h$mostrar            <- function() {
-                                if (!.vtc_existe(ventana)) return(invisible(h))
+                                if (!.vtc.existe(ventana)) return(invisible(h))
                                 h$recalcular()
+                                tcltk::tkwm.deiconify(ventana)
                                 tcltk::tkraise(ventana)
                                 tcltk::tcl("focus", "-force", ventana)
                                 if (isTRUE(bloquear)) tcltk::tkwait.window(ventana)
@@ -154,12 +184,12 @@ vtc                      <- function(titulo            = "deor"
                             }
 
     h$cerrar             <- function() {
-                                if (.vtc_existe(ventana)) tcltk::tkdestroy(ventana)
+                                if (.vtc.existe(ventana)) tcltk::tkdestroy(ventana)
                                 invisible(NULL)
                             }
 
     if (!is.null(texto)) {
-        .vtc_texto(h, texto, filas_max, boton)
+        .vtc.texto(h, texto, filas_max, boton)
         return(h$mostrar())
     }
     invisible(h)
@@ -170,8 +200,8 @@ vtc                      <- function(titulo            = "deor"
 
 # cuadro de texto seleccionable + botones Copiar y cierre dentro de h$frm
 #' @noRd
-.vtc_texto               <- function(h, texto, filas_max, boton) {
-    lineas               <- .vtc_lineas(texto)
+.vtc.texto               <- function(h, texto, filas_max, boton) {
+    lineas               <- .vtc.lineas(texto)
     contenido            <- paste(lineas, collapse = "\n")
     marco                <- tcltk::tkframe(h$frm)
 
@@ -216,7 +246,7 @@ vtc                      <- function(titulo            = "deor"
     avisar               <- function(btn, aviso, etiqueta) {
         tcltk::tkconfigure(btn, text = aviso)
         tcltk::tcl("after", 1500L, function() {
-            if (.vtc_existe(btn)) tcltk::tkconfigure(btn, text = etiqueta)
+            if (.vtc.existe(btn)) tcltk::tkconfigure(btn, text = etiqueta)
         })
     }
     # deja `txt` en el portapapeles y avisa en el botón
@@ -271,7 +301,7 @@ vtc                      <- function(titulo            = "deor"
 # canvas con barras de desplazamiento que aparecen solo si el contenido no cabe.
 # Devuelve list(frm, grosor_barra, barras).
 #' @noRd
-.vtc_scrollable          <- function(ventana, margen) {
+.vtc.scrollable          <- function(ventana, margen) {
     canvas               <- tcltk::tkcanvas(ventana, highlightthickness = 0)
 
     # barra -> canvas: la barra desplaza el contenido
@@ -301,7 +331,7 @@ vtc                      <- function(titulo            = "deor"
     tcltk::tkgrid(scroll_h, row = 1, column = 0, sticky = "ew")
     tcltk::tkgrid.rowconfigure(ventana,       0, weight = 1)
     tcltk::tkgrid.columnconfigure(ventana,    0, weight = 1)
-    grosor_barra         <- .vtc_medida(scroll_v, "reqwidth")
+    grosor_barra         <- .vtc.medida(scroll_v, "reqwidth")
     tcltk::tkgrid.remove(scroll_v)
     tcltk::tkgrid.remove(scroll_h)
 
@@ -324,9 +354,9 @@ vtc                      <- function(titulo            = "deor"
         if (h) tcltk::tkgrid(scroll_h) else tcltk::tkgrid.remove(scroll_h)
     }
     ajustar              <- function() {
-        ancho_c          <- .vtc_medida(canvas, "width")
-        ancho_f          <- .vtc_medida(frm,    "reqwidth")
-        alto_f           <- .vtc_medida(frm,    "reqheight")
+        ancho_c          <- .vtc.medida(canvas, "width")
+        ancho_f          <- .vtc.medida(frm,    "reqwidth")
+        alto_f           <- .vtc.medida(frm,    "reqheight")
         tcltk::tkitemconfigure(canvas
                                , id
                                , width = max(ancho_f, ancho_c)
@@ -359,7 +389,7 @@ vtc                      <- function(titulo            = "deor"
 
 # pantalla principal: xrandr en Linux; si no, la pantalla completa según Tk
 #' @noRd
-.vtc_monitor             <- function(ventana) {
+.vtc.monitor             <- function(ventana) {
     if (identical(Sys.info()[["sysname"]], "Linux") && nzchar(Sys.which("xrandr"))) {
         salida           <- tryCatch(system2("xrandr"
                                              , "--query"
@@ -389,8 +419,8 @@ vtc                      <- function(titulo            = "deor"
             return(if (length(primario) > 0) primario[[1]] else monitores[[1]])
         }
     }
-    list(ancho   = .vtc_medida(ventana, "screenwidth")
-         , alto  = .vtc_medida(ventana, "screenheight")
+    list(ancho   = .vtc.medida(ventana, "screenwidth")
+         , alto  = .vtc.medida(ventana, "screenheight")
          , x     = 0L
          , y     = 0L
     )
@@ -399,7 +429,7 @@ vtc                      <- function(titulo            = "deor"
 
 # vector de texto -> vector de líneas (separa también los "\n" internos)
 #' @noRd
-.vtc_lineas              <- function(texto) {
+.vtc.lineas              <- function(texto) {
     texto                <- as.character(texto)
     texto[is.na(texto)]  <- "NA"
     if (length(texto) == 0) return("")
@@ -409,24 +439,24 @@ vtc                      <- function(titulo            = "deor"
 }
 
 #' @noRd
-.vtc_fuente_sistema      <- function() {
+.vtc.fuente.sistema      <- function() {
     if (.Platform$OS.type == "windows")                     "Consolas"
     else if (identical(Sys.info()[["sysname"]], "Darwin"))  "Menlo"
     else                                                    "LM Mono Slanted 10"
 }
 
 #' @noRd
-.vtc_fuente_tk           <- function(familia, tamano, estilo = "") {
+.vtc.fuente.tk           <- function(familia, tamano, estilo = "") {
     if (grepl(" ", familia, fixed = TRUE)) familia <- sprintf("{%s}", familia)
     trimws(paste(familia, as.integer(tamano), estilo))
 }
 
 #' @noRd
-.vtc_medida              <- function(widget, que) {
+.vtc.medida              <- function(widget, que) {
     as.integer(tcltk::tclvalue(tcltk::tkwinfo(que, widget)))
 }
 
 #' @noRd
-.vtc_existe              <- function(widget) {
+.vtc.existe              <- function(widget) {
     identical(tcltk::tclvalue(tcltk::tkwinfo("exists", widget)), "1")
 }

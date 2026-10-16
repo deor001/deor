@@ -3,6 +3,8 @@
 export(fnc)
 export(ils)
 export(ipr)
+export(lar)
+export(nuo)
 export(vtc)
 importFrom(rstudioapi,
   document_position,

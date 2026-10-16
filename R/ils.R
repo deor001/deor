@@ -1,42 +1,50 @@
 
-
 #           ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 #           ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ INSERTAR LÍNEA DE SECCIÓN ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
-#           ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ [ILN] ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+#           ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ [ILS] ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 #
 #
 if(FALSE){
-    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
-    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
     # OBJETIVO
     #
-    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # Insertar líneas de sección con distintos formatos y funcionalidades
     #
+    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # AUTOR
     #
     # Nombre:            Manuel de Orúe Ríos (@deor)
     # Correo:            deor001@gmail.com
     # Obs:               con asistencia de IA
-    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # REGISTRO DE DEPENDENCIAS
+    #
+    # No tiene dependencias
+    #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # REGISTRO DE MODIFICACIONES
     #
-    # Versión operativa: v3.0.0
-    # Versión actual:    v3.0.0
-    # Fecha de creación: 260921
-    # Fecha de versión:  261012
-    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Versión           Fecha ini       Fecha fin
+    # v1.0.00           260921          260921
+    # v2.0.00           260921          260921
+    # v3.0.00           261012          261012
+    # v3.0.01           261015          261015
     #
-    # HALLAZGO 1
+    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # BITÁCORA
     #
-    # Descripción:       Incluye un addin para RStudio
+    # Fecha:
     #
-    # Observador:        @deor
+    # Descripción:
     #
-    # Corrector:
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
     #
     # Acción:
-    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
 
 # 1.. Reglas
@@ -51,7 +59,7 @@ if(FALSE){
 #'
 #' @return Lista nombrada de funciones.
 #' @noRd
-.reglas <- function() {
+.ils.reglas <- function() {
     list(
         "l0" = function(n, col) strrep(" ", if (is.null(n)) 80L else n),
         "l1" = function(n, col) strrep("Ξ", if (is.null(n)) 80L else n),
@@ -115,8 +123,11 @@ if(FALSE){
 #' }
 #'
 #' @return Invisiblemente \code{NULL}. Modifica el documento activo.
+#'
 #' @export
+#'
 #' @importFrom rstudioapi getActiveDocumentContext document_range document_position modifyRange
+#'
 #' @examples
 #' # | Clave  | Resultado                                         | Ejemplo                  |
 #' # |--------|---------------------------------------------------|--------------------------|
@@ -136,7 +147,7 @@ ils <- function() {
     before    <- substr(line, 1, col - 1)
 
     ## 2.2-- detectar clave antes del cursor
-    m         <- regmatches(before, regexpr("l[0-9]+[0-9]*$", before, perl = TRUE))
+    m         <- regmatches(before, regexpr("l[0-9]+$", before, perl = TRUE))
 
     if (length(m) == 0 || m == "") return(invisible(NULL))
 
@@ -147,7 +158,7 @@ ils <- function() {
     start_col <- col - nchar(m)
 
     ## 2.3-- construir texto según reglas
-    reglas    <- .reglas()
+    reglas    <- .ils.reglas()
     if (!clave %in% names(reglas)) return(invisible(NULL))
     texto     <- reglas[[clave]](n, start_col)
     if (!nzchar(texto)) return(invisible(NULL))
