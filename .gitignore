@@ -1,7 +1,23 @@
-.Rproj.user
+# Historia y datos de sesión de R
 .Rhistory
+.Rapp.history
 .RData
 .Ruserdata
-.httr-oauth
+
+# RStudio
+.Rproj.user/
+
+# Artefactos de construcción / chequeo
+*.tar.gz
+*.Rcheck/
+..Rcheck/
+/src/*.o
+/src/*.so
+/src/*.dll
+
+# pkgdown (sitio generado)
+docs/
+
+# Sistema operativo
 .DS_Store
-.quarto
+Thumbs.db

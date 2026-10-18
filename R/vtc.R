@@ -32,6 +32,9 @@ if(FALSE){
     # v1.0.02           261013          261013
     # v1.0.03           261013          261014
     # v1.0.04           261015          261015
+    # v1.0.05           261017          261017
+    # v1.0.06           261017          261017
+    # v1.0.07           261017          261017
     #
     #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # BITÁCORA
@@ -54,6 +57,66 @@ if(FALSE){
     #
     # Acción:           Corrigió decidiéndolas una sola vez en recalcular()
     #                   se crea oculta y se muestra después de recalcular()
+    #
+    #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # Fecha:            261017
+    #
+    # Versión:          v1.0.05
+    #
+    # Descripción:      Se detecta bug que produce una ventana vacía
+    #                       cuando se ejecuta por primera vez.
+    #                       Luego, presenta un funcionamiento según lo esperado.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           A la función h$mostrar se agrega dos nuevas líneas:
+    #                       tcl("update")
+    #                       Se modifica la función Ajustar
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261017
+    #
+    # Versión:          v1.0.06
+    #
+    # Descripción:      La ventana gris de la primera vez de la sesión no era
+    #                       por tkwait.window: tcl("update") retorna antes de
+    #                       que el gestor de ventanas (KWin) mapee y exponga la
+    #                       ventana, así el canvas y su frame embebido no se
+    #                       dibujan hasta reabrir.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           En h$mostrar: (1) tkwait.visibility para mapear y medir
+    #                       con la ventana ya mapeada; (2) un ciclo
+    #                       withdraw -> deiconify que reproduce el "cerrar y
+    #                       reabrir" (segundo mapeo con widgets ya realizados),
+    #                       que es lo unico que pinta el canvas en KWin/XWayland;
+    #                       (3) todo el doble mapeo se hace con -alpha 0 y se
+    #                       revela al final, para que no se vea el parpadeo.
+    #                       Arregla a todas las ventanas vtc (sar, frm.clic, lar).
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261017
+    #
+    # Versión:          v1.0.07
+    #
+    # Descripción:      El -alpha 0 de v1.0.06 dejaba la ventana oculta/sin
+    #                       activar en KWin (había que pulsar el icono de la
+    #                       barra para que apareciera): tkwait.visibility sobre
+    #                       una ventana transparente no se resuelve bien.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           Se quita el -alpha: vuelve el leve parpadeo pero la
+    #                       ventana aparece SIEMPRE, visible y enfocada.
+    #                       h$recalcular ahora llama sc$ajustar(), para que el
+    #                       canvas se reajuste al mostrar/ocultar campos (sar).
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
@@ -144,6 +207,7 @@ vtc                      <- function(titulo            = "deor"
     h$recalcular         <- function() {
         if (!.vtc.existe(ventana)) return(invisible(NULL))
         tcltk::tcl("update", "idletasks")
+        sc$ajustar()     # refit del canvas (necesario al mostrar/ocultar campos)
         ancho            <- max(.vtc.medida(h$frm, "reqwidth"),  as.integer(ancho_min))
         alto             <- max(.vtc.medida(h$frm, "reqheight"), as.integer(alto_min))
         alto_util        <- max(monitor$alto - as.integer(margen_pantalla), 150L)
@@ -176,9 +240,33 @@ vtc                      <- function(titulo            = "deor"
     h$mostrar            <- function() {
                                 if (!.vtc.existe(ventana)) return(invisible(h))
                                 h$recalcular()
+                                # 1) primer mapeo: realiza y mide los widgets.
+                                #    tkwait.visibility BLOQUEA hasta que la ventana
+                                #    esta mapeada (VisibilityNotify).
                                 tcltk::tkwm.deiconify(ventana)
                                 tcltk::tkraise(ventana)
-                                tcltk::tcl("focus", "-force", ventana)
+                                if (.vtc.existe(ventana))
+                                    try(tcltk::tkwait.visibility(ventana)
+                                      , silent = TRUE)
+                                sc$ajustar()         # mide el canvas ya mapeado
+                                h$recalcular()       # geometria con medidas reales
+                                # 2) ciclo ocultar -> mostrar: reproduce el "cerrar
+                                #    y reabrir" que arregla la ventana gris en KWin/
+                                #    XWayland (el primer "expose" del canvas embebido
+                                #    a veces no llega). Produce un leve parpadeo, pero
+                                #    es FIABLE: deja la ventana visible y enfocada.
+                                #    (NO se usa -alpha 0 para ocultarlo: en este
+                                #     gestor deja la ventana sin activar y hay que
+                                #     pulsar el icono de la barra para que aparezca.)
+                                if (.vtc.existe(ventana)) {
+                                    tcltk::tkwm.withdraw(ventana)
+                                    tcltk::tcl("update", "idletasks")
+                                    tcltk::tkwm.deiconify(ventana)
+                                    tcltk::tkraise(ventana)
+                                    tcltk::tcl("focus", "-force", ventana)
+                                    sc$ajustar()
+                                    h$recalcular()
+                                }
                                 if (isTRUE(bloquear)) tcltk::tkwait.window(ventana)
                                 invisible(h)
                             }
@@ -383,7 +471,11 @@ vtc                      <- function(titulo            = "deor"
                       , "<Shift-MouseWheel>"
                       , function(D) desplazar_h(-as.integer(as.numeric(D) / 120)))
     }
-    list(frm = frm, grosor_barra = grosor_barra, barras = mostrar_barras)
+    list(frm = frm
+         , grosor_barra = grosor_barra
+         , barras = mostrar_barras
+         , ajustar = ajustar
+         )
 }
 #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 

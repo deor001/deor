@@ -1,0 +1,122 @@
+---
+title: "Guía de uso de deor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Guía de uso de deor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# Los ejemplos se muestran pero no se ejecutan: dependen de binarios del
+# sistema (gpg, qpdf, LibreOffice, python3) que pueden no estar presentes al
+# construir la viñeta.
+knitr::opts_chunk$set(eval = FALSE, comment = "#>")
+```
+
+`deor` reúne funciones de apoyo para el trabajo diario en R. Esta guía recorre
+los módulos con ejemplos. Para la instalación y los requisitos de sistema, ver
+el archivo `README` del paquete.
+
+```{r}
+library(deor)
+```
+
+## Formato numérico chileno
+
+```{r}
+fnc(1234567.89)   # "1.234.567,89"
+```
+
+## Lectura multiformato: `lar`
+
+`lar` detecta el formato por la extensión y devuelve los datos listos. Reconoce
+planillas, formatos de datos, documentos y contenedores; para los `.csr` y
+`.cfr` cifrados pide la contraseña y los lee como si fueran un `.zip`.
+
+```{r}
+datos <- lar("~/datos/pacientes.xlsx")
+texto <- lar("~/docs/informe.pdf")
+```
+
+## Binarios del sistema: `bin`
+
+Localiza binarios externos en las rutas típicas de cada sistema operativo. En
+Windows, si un binario está fuera del `PATH`, se fija a mano.
+
+```{r}
+bin.estado()                                  # resumen de lo encontrado
+bin.hay("qpdf")                               # TRUE / FALSE
+bin.fijar("soffice", "C:/.../program/soffice.exe")
+```
+
+## Cifrado y compresión: `cfr`, `dcf`, `zpr`
+
+`cfr` cifra según la extensión del archivo (Office, PDF, OpenDocument, imagen)
+y, para el resto, produce un contenedor `.csr` portable. `dcf` revierte la
+operación y además abre `.zip` / `.7z` nativos. `zpr` genera archivos 7z o zip
+para entregar a terceros, con cifrado AES opcional.
+
+```{r}
+# Cifrar / descifrar
+cfr("informe.pdf", clave = "mi-clave")        # -> informe.pdf.csr
+dcf("informe.pdf.csr", clave = "mi-clave")    # -> informe.pdf
+
+# Abrir un zip/7z cifrado creado por otra herramienta
+dcf("entrega.7z", clave = "clave-del-tercero")
+
+# Comprimir para entregar (7z con AES por defecto)
+zpr("carpeta_entrega", clave = "clave-entrega")
+zpr("carpeta_entrega", formato = "zip", clave = "clave-entrega")
+```
+
+## Firma por imagen: `frm`
+
+Inserta una imagen de firma en un documento. En PDF se puede dar la posición
+exacta (`frm.pdf`) o elegirla con un clic (`frm.clic`); en Word y OpenDocument
+se reemplaza un marcador de texto.
+
+```{r}
+frm.pdf("contrato.pdf", "firma.png",
+        pagina = 1, x = 300, y = 300, ancho = 160)
+frm.clic("contrato.pdf", "firma.png")         # elegir el punto con el mouse
+frm.docx("carta.docx", "firma.png", marcador = "[[FIRMA]]")
+frm.odt("carta.odt",  "firma.png", marcador = "[[FIRMA]]")
+```
+
+> La firma puede guardarse protegida dentro de un `.csr`; en ese caso el
+> contenedor debe traer **exactamente una** imagen.
+
+## Páginas de PDF: `hpd`
+
+```{r}
+hpd.extraer("libro.pdf", paginas = c(2, 4, 6))     # -> libro-hojas.pdf
+hpd.eliminar("libro.pdf", paginas = 3)             # -> libro-sin-hojas.pdf
+hpd.reordenar("libro.pdf", orden = c(3, 1, 2))     # -> libro-reordenado.pdf
+hpd.rotar("libro.pdf", paginas = 1, grados = 90)   # -> libro-rotado.pdf
+hpd.unir(c("a.pdf", "b.pdf"))                       # -> a-unido.pdf
+hpd.insertar("a.pdf", "b.pdf", despues = 2)         # -> a-con-insercion.pdf
+```
+
+## Contenedor seguro portable: `cnt`
+
+Empaqueta una carpeta (o un solo archivo) en un contenedor `.csr`
+(`tar + GnuPG AES-256`) que se abre en otro equipo con cualquier `gpg`, sin R.
+
+```{r}
+cnt.crear("~/proyecto", "proyecto.csr", clave = "x")   # empaquetar y cifrar
+cnt.abrir("proyecto.csr", "~/trabajo", clave = "x")    # extraer para trabajar
+cnt.cerrar("~/trabajo", "proyecto.csr", clave = "x")   # re-empaquetar
+```
+
+## Interfaz gráfica: `sar`
+
+`sar()` sin argumentos abre un formulario donde se elige la acción y se
+completan solo sus campos. También se invoca cualquier acción por su nombre.
+
+```{r}
+sar()                                   # formulario gráfico
+sar("ayuda")                            # lista de acciones
+sar("deps")                             # verifica dependencias
+sar("cifrar", "informe.pdf", clave = "x")
+```

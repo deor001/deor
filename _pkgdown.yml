@@ -1,0 +1,42 @@
+url: https://deor001.github.io/deor
+
+template:
+  bootstrap: 5
+  language: es
+
+reference:
+- title: Formato y utilidades
+  desc: Funciones de apoyo general.
+  contents:
+  - fnc
+- title: Lectura multiformato
+  desc: Lector de archivos con detección por extensión.
+  contents:
+  - lar
+- title: Binarios del sistema (bin)
+  desc: Localización multiplataforma de binarios externos.
+  contents:
+  - starts_with("bin.")
+- title: Cifrado y compresión (cfr)
+  desc: Cifrar, descifrar y comprimir archivos.
+  contents:
+  - cfr
+  - dcf
+  - zpr
+- title: Firma de documentos (frm)
+  desc: Inserción de una imagen de firma.
+  contents:
+  - starts_with("frm.")
+- title: Páginas PDF (hpd)
+  desc: Extraer, eliminar, reordenar, rotar, unir e insertar páginas.
+  contents:
+  - starts_with("hpd.")
+- title: Contenedor seguro (cnt)
+  desc: Contenedor portable .csr (tar + GnuPG AES-256).
+  contents:
+  - starts_with("cnt.")
+- title: Interfaz gráfica (sar)
+  desc: Formulario Tk para las operaciones de seguridad.
+  contents:
+  - sar
+  - sar.deps

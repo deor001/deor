@@ -26,6 +26,8 @@ if (FALSE) {
     #                   ipr (instalación de paquetes)
     #                   nuo (nombres de objetos)
     #                   vtc (ventanas)
+    #                   cnt (abrir contenedores .csr)
+    #                   cfr/dcf (abrir sobres .cfr antiguos)
     #
     # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # REGISTRO DE MODIFICACIONES
@@ -34,6 +36,7 @@ if (FALSE) {
     # v1.0.00           250928          260115
     # v2.0.00           261014          261014
     # v2.0.01           261015          261015
+    # v2.1.00           261018          261018
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
     # BITÁCORA
@@ -51,6 +54,22 @@ if (FALSE) {
     #
     # Acción:           Ajuste del código
     #                   Se creo la función .lar.elegir.archivos
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261018
+    #
+    # Versión:          v2.1.00
+    #
+    # Descripción:      lar reconoce contenedores cifrados .csr (y sobres .cfr
+    #                       antiguos): pide la clave, descifra en una carpeta
+    #                       temporal y recursa sobre el contenido. Integra sar.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           Se agregan .lar.expandir.cifrado y .lar.pedir.clave;
+    #                       csr/cfr -> tipo "cifrado" en .lar.formatos.
     #
     #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 }
@@ -76,6 +95,7 @@ if (FALSE) {
                               , rda      = "rdata",      json     = "json"
                               , zip      = "archivo",    `7z`     = "archivo"
                               , rar      = "archivo",    tar      = "archivo"
+                              , csr      = "cifrado",    cfr      = "cifrado"
                               , tgz      = "archivo",    gz       = "comprimido"
                               , bz2      = "comprimido", xz       = "comprimido"
                               )
@@ -385,6 +405,7 @@ lar                      <- function(...
 
     switch(tipo
            , archivo     = .lar.expandir.archivo(ruta, tmp, nivel, etiqueta)
+           , cifrado     = .lar.expandir.cifrado(ruta, tmp, nivel, etiqueta)
            , comprimido  = .lar.expandir(.lar.descomprimir(ruta, tmp)
                                          , tmp
                                          , nivel + 1L
@@ -609,6 +630,50 @@ lar                      <- function(...
 }
 #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 
+# Contenedor cifrado .csr (gpg+tar) o sobre .cfr antiguo (openssl): pide la
+# clave, lo descifra en una carpeta TEMPORAL (dentro de 'tmp', que lar borra al
+# terminar) y recursa sobre el contenido, igual que un archivo comprimido.
+# Requiere los modulos cnt (.csr) y cfr/dcf (.cfr) de deor.
+.lar.expandir.cifrado    <- function(ruta, tmp, nivel, etiqueta) {
+    ext                  <- .lar.ext(ruta)
+    clave                <- .lar.pedir.clave(sprintf("Clave para %s"
+                                                   , basename(ruta)))
+    if (!nzchar(clave)) stop("sin clave: no se abrió el contenedor cifrado")
+
+    destino              <- tempfile("cif_", tmpdir = tmp)
+    dir.create(destino)
+    if (ext              == "csr") {
+        if (!exists("cnt.abrir", mode = "function"))
+            stop("falta el modulo cnt para abrir .csr", call. = FALSE)
+        cnt.abrir(ruta, destino, clave)       # gpg+tar: extrae todo a 'destino'
+        extraidos        <- list.files(destino, recursive = TRUE
+                                     , full.names = TRUE, all.files = TRUE
+                                     , no.. = TRUE)
+        extraidos        <- extraidos[!dir.exists(extraidos)]
+    } else {                                  # .cfr antiguo (openssl, 1 archivo)
+        if (!exists("dcf", mode = "function"))
+            stop("falta cfr/dcf para abrir .cfr", call. = FALSE)
+        interno          <- file.path(destino
+                                    , sub("\\.cfr$", "", basename(ruta)
+                                        , ignore.case = TRUE))
+        dcf(ruta, clave, salida = interno)
+        extraidos        <- interno
+    }
+    if (length(extraidos) == 0L) stop("el contenedor no trae archivos")
+
+    # recursa sobre cada archivo descifrado (un error en uno no para al resto)
+    unlist(lapply(extraidos, function(f) {
+        etiq             <- paste(etiqueta, ">", basename(f))
+        tryCatch(.lar.expandir(f, tmp, nivel + 1L, etiq)
+                 , error = function(e) {
+                     msj <- conditionMessage(e)
+                     list(.lar.item(.lar.sin.ext(basename(f)), TRUE, etiq
+                                    , function() stop(msj, call. = FALSE)))
+                 })
+    }), recursive = FALSE)
+}
+#ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+
 #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 #           ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ VENTANAS (deor::vtc) ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ ----
 #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
@@ -670,6 +735,36 @@ lar                      <- function(...
     .lar.botones(h, list(`Sí` = si, No = h$cerrar))
     h$mostrar()
     respuesta
+}
+#ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+
+# Pide una clave en una ventana (vtc). Entrada oculta con puntos; boton "ver"
+# muestra el texto mientras se mantiene pulsado. Devuelve "" si se cancela.
+.lar.pedir.clave         <- function(titulo) {
+    clave                <- ""
+    h                    <- vtc(titulo)
+    v                    <- tcltk::tclVar("")
+    tcltk::tkpack(tcltk::tklabel(h$frm, text = "Clave:"
+                               , font = h$fuente(e = "bold"))
+                  , anchor = "w")
+    e                    <- tcltk::tkentry(h$frm, textvariable = v, show = "*"
+                                         , width = 32, font = h$fuente())
+    tcltk::tkpack(e, anchor = "w", pady = c(2, 0))
+    bv                   <- tcltk::tkbutton(h$frm, text = "ver", width = 6
+                                          , font = h$fuente())
+    tcltk::tkbind(bv, "<ButtonPress-1>"
+                , function() tcltk::tkconfigure(e, show = ""))
+    tcltk::tkbind(bv, "<ButtonRelease-1>"
+                , function() tcltk::tkconfigure(e, show = "*"))
+    tcltk::tkpack(bv, anchor = "w", pady = c(2, 0))
+    aceptar              <- function() {
+        clave            <<- tcltk::tclvalue(v)
+        h$cerrar()
+    }
+    tcltk::tkbind(h$ventana, "<Return>", function() aceptar())
+    .lar.botones(h, list(Aceptar = aceptar, Cancelar = h$cerrar))
+    h$mostrar()
+    clave
 }
 #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
 
