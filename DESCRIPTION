@@ -39,6 +39,9 @@ Imports:
 Suggests:
     archive,
     arrow,
+    audio.whisper,
+    av,
+    callr,
     data.table,
     dplyr,
     foreign,
@@ -46,8 +49,13 @@ Suggests:
     haven,
     jsonlite,
     knitr,
+    officer,
+    processx,
+    qpdf,
     readODS,
     readxl,
     rmarkdown,
-    RODBC
+    RODBC,
+    zip
+Remotes:  bnosac/audio.whisper
 VignetteBuilder: knitr

@@ -35,6 +35,8 @@ if(FALSE){
     # v1.0.05           261017          261017
     # v1.0.06           261017          261017
     # v1.0.07           261017          261017
+    # v1.0.08           261019          261019
+    # v1.0.09           261019          261019
     #
     #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # BITÁCORA
@@ -117,6 +119,40 @@ if(FALSE){
     #                       ventana aparece SIEMPRE, visible y enfocada.
     #                       h$recalcular ahora llama sc$ajustar(), para que el
     #                       canvas se reajuste al mostrar/ocultar campos (sar).
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261019
+    #
+    # Versión:          v1.0.08
+    #
+    # Descripción:      En a2t, la ventana del informe se cerraba mientras vtc
+    #                       la dibujaba (Enter/clic en cola tras un proceso
+    #                       largo) y sc$ajustar() medía un canvas inexistente:
+    #                       "bad window path name".
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           ajustar() sale sin hacer nada si el canvas ya no
+    #                       existe (.vtc.existe).
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261019
+    #
+    # Versión:          v1.0.09
+    #
+    # Descripción:      a2t: "bad window path name" al cerrar el formulario.
+    #                       h$mostrar quedaba detenido en tkwait.visibility
+    #                       (la ventana ya se usaba) y, al cerrarla, llegaba a
+    #                       tkwait.window con la ventana ya destruida.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           tkwait.window solo si la ventana aún existe (si ya se
+    #                       cerró, no hay nada que esperar).
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
@@ -267,7 +303,10 @@ vtc                      <- function(titulo            = "deor"
                                     sc$ajustar()
                                     h$recalcular()
                                 }
-                                if (isTRUE(bloquear)) tcltk::tkwait.window(ventana)
+                                # si se cerró mientras esperaba la visibilidad, ya
+                                #   no hay nada que esperar
+                                if (isTRUE(bloquear) && .vtc.existe(ventana))
+                                    tcltk::tkwait.window(ventana)
                                 invisible(h)
                             }
 
@@ -442,6 +481,9 @@ vtc                      <- function(titulo            = "deor"
         if (h) tcltk::tkgrid(scroll_h) else tcltk::tkgrid.remove(scroll_h)
     }
     ajustar              <- function() {
+        # la ventana pudo cerrarse antes de medir (ej. Enter/Escape o clic
+        #   en cola mientras R estaba ocupado): no hay nada que ajustar
+        if (!.vtc.existe(canvas)) return(invisible(NULL))
         ancho_c          <- .vtc.medida(canvas, "width")
         ancho_f          <- .vtc.medida(frm,    "reqwidth")
         alto_f           <- .vtc.medida(frm,    "reqheight")
