@@ -67,6 +67,10 @@ if (FALSE) {
         return(file.path(base_dir, nom))
     }
     salida <- trimws(salida)
+    # sin la extensión del origen (ej. "acta" o "acta.v2"): se agrega
+    ext <- tools::file_ext(origen)
+    if (nzchar(ext) && tolower(tools::file_ext(salida)) != tolower(ext))
+        salida <- paste0(salida, ".", ext)
     if (.hpd.es.absoluta(salida)) return(path.expand(salida))
     file.path(base_dir, salida)
 }

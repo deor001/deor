@@ -35,6 +35,7 @@ if (FALSE) {
     #
     # Versión           Fecha ini       Fecha fin
     # v0.1.00           261017          261018
+    # v0.1.01           261019          261019
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
     # BITÁCORA
@@ -48,6 +49,27 @@ if (FALSE) {
     # Corrector:        @deor
     #
     # Acción:           Fase 2 (sin cambios de logica).
+    #
+    # ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
+    # Fecha:            261019
+    #
+    # Versión:          v.0.1.01
+    #
+    # Descripción:      (1) nombre de salida sin extensión: el archivo quedaba
+    #                       sin ella. (2) Sobrescribía la salida existente,
+    #                       incluso el original. (3) Al girar la firma, las
+    #                       esquinas quedaban blancas (contorno visible).
+    #                       (4) Dos firmas en el mismo docx: la segunda
+    #                       reemplazaba la imagen de la primera.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           .frm.salida agrega la extensión del origen y usa
+    #                       .frm.libre (_c001...). image_background("none")
+    #                       antes de rotar. frm.docx: imagen firmaN.png,
+    #                       rIdFirmaN y docPr único por firma.
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
@@ -63,15 +85,34 @@ if (FALSE) {
     grepl("^(/|~)", ruta) || grepl("^[A-Za-z]:[\\\\/]", ruta)
 }
 
+# ruta libre: si ya existe, agrega _c001, _c002... (nunca sobrescribe; sobre
+#   999, marca de tiempo)
+.frm.libre <- function(ruta) {
+    if (!file.exists(ruta)) return(ruta)
+    dir  <- dirname(ruta)
+    ext  <- tools::file_ext(ruta)
+    base <- tools::file_path_sans_ext(basename(ruta))
+    for (k in seq_len(999L)) {
+        r <- file.path(dir, sprintf("%s_c%03d.%s", base, k, ext))
+        if (!file.exists(r)) return(r)
+    }
+    file.path(dir, sprintf("%s_%s.%s", base
+                           , format(Sys.time(), "%Y%m%d_%H%M%S"), ext))
+}
+
 .frm.salida <- function(salida, archivo, sufijo = "firmado") {
     base_dir <- dirname(archivo)
     if (is.null(salida) || !nzchar(trimws(salida))) {
         nom <- sub("(\\.[^.]+)$", paste0("-", sufijo, "\\1"), basename(archivo))
-        return(file.path(base_dir, nom))
+        return(.frm.libre(file.path(base_dir, nom)))
     }
     salida <- trimws(salida)
-    if (.frm.es.absoluta(salida)) return(path.expand(salida))
-    file.path(base_dir, salida)
+    # sin la extensión del origen (ej. "acta" o "acta.v2"): se agrega
+    ext <- tools::file_ext(archivo)
+    if (nzchar(ext) && tolower(tools::file_ext(salida)) != tolower(ext))
+        salida <- paste0(salida, ".", ext)
+    if (.frm.es.absoluta(salida)) return(.frm.libre(path.expand(salida)))
+    .frm.libre(file.path(base_dir, salida))
 }
 
 # ===== l1 : preparación de la imagen de firma ==============================
@@ -147,7 +188,9 @@ if (FALSE) {
         img <- magick::image_colorize(img, opacity = 55, color = tinta)
     }
     if (difumina) img <- magick::image_blur(img, radius = 0.6, sigma = 0.4)
-    # leve rotación aleatoria (±2°) para quitar aspecto de "pegado"
+    # leve rotación aleatoria (±2°) para quitar aspecto de "pegado"; las
+    #   esquinas que agrega el giro van transparentes (no blancas)
+    img <- magick::image_background(img, "none")
     img <- magick::image_rotate(img, stats::runif(1, -2, 2))
     img
 }
@@ -292,7 +335,7 @@ frm.clic <- function(archivo, firma, salida = NULL, pagina = 1
 # Inserta la imagen donde esté el marcador. XML de dibujo inline verificado.
 # (La preparación de tinta/transparencia se aplica a la imagen antes.)
 
-.frm.docx.dibujo <- function(rid, emu_w, emu_h) {
+.frm.docx.dibujo <- function(rid, emu_w, emu_h, id = 1L) {
     a  <- "http://schemas.openxmlformats.org/drawingml/2006/main"
     wp <- paste0("http://schemas.openxmlformats.org/drawingml/2006/"
                , "wordprocessingDrawing")
@@ -303,11 +346,11 @@ frm.clic <- function(archivo, firma, salida = NULL, pagina = 1
         '<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0" '
       , 'xmlns:wp="', wp, '">'
       , '<wp:extent cx="', emu_w, '" cy="', emu_h, '"/>'
-      , '<wp:docPr id="1" name="Firma"/>'
+      , '<wp:docPr id="', id, '" name="Firma ', id, '"/>'
       , '<a:graphic xmlns:a="', a, '">'
       , '<a:graphicData uri="', pc, '">'
       , '<pic:pic xmlns:pic="', pc, '">'
-      , '<pic:nvPicPr><pic:cNvPr id="1" name="Firma"/><pic:cNvPicPr/>'
+      , '<pic:nvPicPr><pic:cNvPr id="', id, '" name="Firma ', id, '"/>'
       , '</pic:nvPicPr>'
       , '<pic:blipFill><a:blip r:embed="', rid, '" xmlns:r="', r, '"/>'
       , '<a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
@@ -362,19 +405,25 @@ frm.docx <- function(archivo, firma, salida = NULL
     # preparar imagen (tinta/transparencia/leve rotación) y guardarla
     img <- .frm.preparar(firma, tinta = tinta, clave_firma = clave_firma)
     info <- magick::image_info(img)
+    # nombre e identificador propios: una segunda firma en el mismo
+    #   documento ([MARCA 2]) no reemplaza la imagen de la primera
     dir.create(file.path(tmp, "word", "media"), showWarnings = FALSE)
-    img_dst <- file.path(tmp, "word", "media", "firma.png")
+    n <- 1L
+    while (file.exists(file.path(tmp, "word", "media"
+                                 , sprintf("firma%d.png", n)))) n <- n + 1L
+    nom_img <- sprintf("firma%d.png", n)
+    img_dst <- file.path(tmp, "word", "media", nom_img)
     magick::image_write(img, img_dst, format = "png")
 
     emu_w <- round(ancho_px / 96 * 914400)
     emu_h <- round(emu_w * info$height / info$width)
-    rid   <- "rIdFirmaUno"
+    rid   <- sprintf("rIdFirma%d", n)
 
     relf <- file.path(tmp, "word", "_rels", "document.xml.rels")
     rel  <- .frm.leer.texto(relf)
     nueva <- paste0('<Relationship Id="', rid, '" Type="http://schemas'
-                  , '.openxmlformats.org/officeDocument/2006/relationships'
-                  , '/image" Target="media/firma.png"/>')
+                    , '.openxmlformats.org/officeDocument/2006/relationships'
+                    , '/image" Target="media/', nom_img, '"/>')
     rel <- sub("</Relationships>", paste0(nueva, "</Relationships>")
              , rel, fixed = TRUE)
     .frm.escribir.texto(rel, relf)
@@ -389,7 +438,7 @@ frm.docx <- function(archivo, firma, salida = NULL
         .frm.escribir.texto(ct, ctf)
     }
 
-    draw <- .frm.docx.dibujo(rid, emu_w, emu_h)
+    draw <- .frm.docx.dibujo(rid, emu_w, emu_h, id = 9000L + n)
     doc  <- sub(marcador
               , paste0("</w:t></w:r><w:r>", draw, "</w:r><w:r><w:t>")
               , doc, fixed = TRUE)
