@@ -16,7 +16,8 @@ a2t(
   salida = NULL,
   hilos = NULL,
   dir_modelos = tools::R_user_dir("deor", "cache"),
-  env = globalenv()
+  env = globalenv(),
+  ventana = interactive()
 )
 }
 \arguments{
@@ -60,6 +61,11 @@ No aplica a los archivos que ya son audio.}
 \item{env}{Ambiente donde quedan los segmentos de cada audio como
 data.frame, con nombre único generado por nuo (primera
 palabra del archivo). NULL = no crea objetos.}
+
+\item{ventana}{TRUE: ventana de avance (lista de archivos, cronómetro,
+tiempo restante, Pausar / Detener / Finalizar); la
+transcripción corre en un proceso aparte. FALSE: en la
+consola, como antes.}
 }
 \value{
 \if{html}{\out{<div class="sourceCode">}}\preformatted{        De forma invisible, los nombres de los objetos creados.

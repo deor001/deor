@@ -37,6 +37,7 @@ if(FALSE){
     # v1.0.07           261017          261017
     # v1.0.08           261019          261019
     # v1.0.09           261019          261019
+    # v1.0.10           261024          261024
     #
     #ӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿӿ
     # BITÁCORA
@@ -153,6 +154,27 @@ if(FALSE){
     #
     # Acción:           tkwait.window solo si la ventana aún existe (si ya se
     #                       cerró, no hay nada que esperar).
+    #
+    #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
+    # Fecha:            261024
+    #
+    # Versión:          v1.0.10
+    #
+    # Descripción:      Windows: ventanas tras RStudio, sin centrar y al
+    #                       cerrar: [tcl] bad window path name ".1.1".
+    #                       Windows (y macOS) no generan eventos Visibility:
+    #                       tkwait.visibility no retornaba hasta destruir la
+    #                       ventana; luego se medía el canvas ya destruido.
+    #
+    # Observador:       @deor
+    #
+    # Corrector:        @deor
+    #
+    # Acción:           Nueva interna .vtc.x11() (tk windowingsystem).
+    #                   h$mostrar: tkwait.visibility y ciclo withdraw ->
+    #                       deiconify solo en X11; en Windows / macOS,
+    #                       update, -topmost momentáneo y foco.
+    #                   Reemplaza el arreglo local .fc.vtc de fec.cat (f2c).
     #
     #ΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞΞ
 }
@@ -275,26 +297,35 @@ vtc                      <- function(titulo            = "deor"
 
     h$mostrar            <- function() {
                                 if (!.vtc.existe(ventana)) return(invisible(h))
+                                x11          <- .vtc.x11()
                                 h$recalcular()
                                 # 1) primer mapeo: realiza y mide los widgets.
-                                #    tkwait.visibility BLOQUEA hasta que la ventana
-                                #    esta mapeada (VisibilityNotify).
                                 tcltk::tkwm.deiconify(ventana)
                                 tcltk::tkraise(ventana)
-                                if (.vtc.existe(ventana))
-                                    try(tcltk::tkwait.visibility(ventana)
-                                      , silent = TRUE)
+                                # X11: tkwait.visibility BLOQUEA hasta que la
+                                #   ventana está mapeada (VisibilityNotify).
+                                # Windows / macOS: no generan eventos Visibility;
+                                #   tkwait.visibility no retornaría hasta destruir
+                                #   la ventana. Basta con update.
+                                if (x11) {
+                                    if (.vtc.existe(ventana))
+                                        try(tcltk::tkwait.visibility(ventana)
+                                          , silent = TRUE)
+                                } else {
+                                    tcltk::tcl("update")
+                                }
                                 sc$ajustar()         # mide el canvas ya mapeado
                                 h$recalcular()       # geometria con medidas reales
-                                # 2) ciclo ocultar -> mostrar: reproduce el "cerrar
-                                #    y reabrir" que arregla la ventana gris en KWin/
-                                #    XWayland (el primer "expose" del canvas embebido
-                                #    a veces no llega). Produce un leve parpadeo, pero
-                                #    es FIABLE: deja la ventana visible y enfocada.
+                                # 2a) X11: ciclo ocultar -> mostrar: reproduce el
+                                #    "cerrar y reabrir" que arregla la ventana gris
+                                #    en KWin/XWayland (el primer "expose" del canvas
+                                #    embebido a veces no llega). Produce un leve
+                                #    parpadeo, pero es FIABLE: deja la ventana
+                                #    visible y enfocada.
                                 #    (NO se usa -alpha 0 para ocultarlo: en este
                                 #     gestor deja la ventana sin activar y hay que
                                 #     pulsar el icono de la barra para que aparezca.)
-                                if (.vtc.existe(ventana)) {
+                                if (.vtc.existe(ventana) && x11) {
                                     tcltk::tkwm.withdraw(ventana)
                                     tcltk::tcl("update", "idletasks")
                                     tcltk::tkwm.deiconify(ventana)
@@ -302,6 +333,21 @@ vtc                      <- function(titulo            = "deor"
                                     tcltk::tcl("focus", "-force", ventana)
                                     sc$ajustar()
                                     h$recalcular()
+                                }
+                                # 2b) Windows / macOS: -topmost momentáneo para
+                                #    traerla al frente (si no, queda tras RStudio)
+                                #    y foco. Se quita -topmost para no tapar
+                                #    otras ventanas después.
+                                if (.vtc.existe(ventana) && !x11) {
+                                    try(tcltk::tcl("wm", "attributes", ventana
+                                                   , "-topmost", 1)
+                                      , silent = TRUE)
+                                    tcltk::tcl("update")
+                                    try(tcltk::tcl("wm", "attributes", ventana
+                                                   , "-topmost", 0)
+                                      , silent = TRUE)
+                                    if (.vtc.existe(ventana))
+                                        tcltk::tcl("focus", "-force", ventana)
                                 }
                                 # si se cerró mientras esperaba la visibilidad, ya
                                 #   no hay nada que esperar
@@ -593,4 +639,10 @@ vtc                      <- function(titulo            = "deor"
 #' @noRd
 .vtc.existe              <- function(widget) {
     identical(tcltk::tclvalue(tcltk::tkwinfo("exists", widget)), "1")
+}
+
+# sistema de ventanas de Tk: "x11" (Linux), "win32" (Windows), "aqua" (macOS)
+#' @noRd
+.vtc.x11                 <- function() {
+    identical(tcltk::tclvalue(tcltk::tcl("tk", "windowingsystem")), "x11")
 }

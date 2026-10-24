@@ -17,7 +17,8 @@ a2t.tipo(
 lugar, testigo, fiscal, actuario, campo10, campo11.
 Los que falten quedan en blanco. NULL = ventana.}
 
-\item{logo}{Imagen (png o jpg) del logo, a la izquierda. NULL = sin logo.}
+\item{logo}{Imagen (png o jpg) del logo, a la izquierda, o texto:
+cada línea separada por "|". NULL = sin logo.}
 
 \item{membrete}{Imagen (png o jpg) del membrete, a la derecha, o texto:
 cada línea separada por "|". NULL = sin membrete.}
